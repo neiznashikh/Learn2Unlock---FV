@@ -1,0 +1,6 @@
+{
+  "name": "Learn2Unlock",
+  "description": "Умный экран блокировки для развития ребенка. Блокирует развлекательные приложения до решения задач.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": []
+}

@@ -1,11 +1,16 @@
-<div align="center">
+# Learn2Unlock 🔒📚
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+** Learn2Unlock** — это умный блокировщик приложений для Android, который превращает экранное время в время для обучения.
 
-  <h1>Built with AI Studio</h2>
+## Как это работает?
+1. Ребенок пытается открыть развлекательное приложение (YouTube, TikTok, Instagram).
+2. Приложение блокируется, и поверх него открывается экран **Learn2Unlock**.
+3. Чтобы разблокировать доступ, необходимо правильно решить 3 задания (математика, логика или языки), сгенерированные ИИ.
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+## Технологии
+- **Frontend:** React + Tailwind CSS + Framer Motion
+- **Android:** Kotlin + Accessibility Service (Служба специальных возможностей)
+- **AI:** Google Gemini API
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
-
-</div>
+## Разработка
+Для сборки APK используется GitHub Actions. Файл сборки находится в `.github/workflows/android.yml`.

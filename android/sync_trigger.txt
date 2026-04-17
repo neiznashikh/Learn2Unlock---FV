@@ -1,0 +1,2 @@
+# Sync trigger
+This file ensures the directory is synced to GitHub.
