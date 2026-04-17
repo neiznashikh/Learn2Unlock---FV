@@ -8,6 +8,7 @@
 
     <application
         android:icon="@drawable/logo"
+        android:roundIcon="@drawable/logo"
         android:label="Learn2Unlock"
         android:theme="@style/Theme.Learn2Unlock"
         android:usesCleartextTraffic="true"
