@@ -1,4 +1,4 @@
-package com.learn2unlock.app
+package com.learn.blocker.final
 
 import android.content.Context
 import android.content.Intent
@@ -10,7 +10,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.learn2unlock.app.services.AppBlockService
+import com.learn.blocker.final.services.AppBlockService
 
 class MainActivity : AppCompatActivity() {
 

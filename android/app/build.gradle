@@ -4,20 +4,17 @@ plugins {
 }
 
 android {
-    namespace 'com.learn2unlock.app'
+    namespace 'com.learn.blocker.final'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.learn2unlock.app"
+        applicationId "com.learn.blocker.final"
         minSdk 24
         targetSdk 33
-        versionCode 101
-        versionName "2.1"
+        versionCode 200
+        versionName "3.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        ndk {
-            abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
-        }
     }
 
     buildTypes {
