@@ -1,9 +1,9 @@
-package com.simple.safe.blocker.services
+package com.learn2unlock.app.services
 
 import android.accessibilityservice.AccessibilityService
 import android.content.Intent
 import android.view.accessibility.AccessibilityEvent
-import com.simple.safe.blocker.MainActivity
+import com.learn2unlock.app.MainActivity
 
 class AppBlockService : AccessibilityService() {
 

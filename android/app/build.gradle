@@ -4,17 +4,20 @@ plugins {
 }
 
 android {
-    namespace 'com.simple.safe.blocker'
+    namespace 'com.learn2unlock.app'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.simple.safe.blocker"
+        applicationId "com.learn2unlock.app"
         minSdk 24
-        targetSdk 31
-        versionCode 3
-        versionName "1.2"
+        targetSdk 33
+        versionCode 100
+        versionName "2.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        ndk {
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+        }
     }
 
     buildTypes {
