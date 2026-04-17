@@ -7,8 +7,8 @@
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
     <application
-        android:icon="@drawable/logo"
-        android:roundIcon="@drawable/logo"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher"
         android:label="Learn2Unlock"
         android:theme="@style/Theme.Learn2Unlock"
         android:usesCleartextTraffic="true"
