@@ -96,9 +96,17 @@ export async function generateTask(profile: ChildProfile): Promise<AIResult> {
     console.error("Gemini API Error:", error);
     const lang = profile.language.toLowerCase().includes('ru') ? 'ru' : 'en';
     const tasks = FALLBACK_TASKS[lang] || FALLBACK_TASKS['en'];
+    
+    let errorMessage = error?.message || "Не удалось подключиться к ИИ. Используем запасную задачу.";
+    if (errorMessage.includes("429") || errorMessage.includes("quota")) {
+      errorMessage = lang === 'ru' 
+        ? "Достигнут лимит запросов ИИ (15 в минуту). Подождите 1 минуту или добавьте свой API-ключ в настройках Secrets (MY_GEMINI_API_KEY)."
+        : "AI rate limit reached (15/min). Please wait 1 minute or add your own API key in Secrets settings (MY_GEMINI_API_KEY).";
+    }
+
     return { 
       task: tasks[Math.floor(Math.random() * tasks.length)],
-      error: error?.message || "Не удалось подключиться к ИИ. Используем запасную задачу."
+      error: errorMessage
     };
   }
 }

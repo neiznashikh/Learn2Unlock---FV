@@ -77,10 +77,12 @@ const PinScreen = ({ onUnlock, correctPin }: { onUnlock: () => void, correctPin:
 const ParentSettingsScreen = ({ profile, onSave, onBack }: { profile: ChildProfile, onSave: (p: ChildProfile) => void, onBack: () => void }) => {
   const [formData, setFormData] = useState<ChildProfile>(profile);
   const [showGuide, setShowGuide] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
 
   return (
     <div className="min-h-screen bg-slate-50 p-6">
       <div className="max-w-2xl mx-auto">
+        {/* ... existing header ... */}
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
             <Settings className="w-8 h-8 text-blue-600" />
@@ -100,6 +102,18 @@ const ParentSettingsScreen = ({ profile, onSave, onBack }: { profile: ChildProfi
         </div>
 
         <AnimatePresence>
+          {localError && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-6 bg-red-50 border-2 border-red-100 p-4 rounded-2xl flex items-center gap-3 text-red-600 font-bold overflow-hidden"
+            >
+              <AlertCircle className="w-6 h-6 shrink-0" />
+              {localError}
+            </motion.div>
+          )}
+        </AnimatePresence>
           {showGuide && (
             <motion.div 
               initial={{ opacity: 0 }} 
@@ -162,20 +176,6 @@ const ParentSettingsScreen = ({ profile, onSave, onBack }: { profile: ChildProfi
         </AnimatePresence>
 
         <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 space-y-6">
-          <div className="bg-blue-50 rounded-2xl p-6 flex flex-col items-center text-center">
-            <h3 className="font-bold text-blue-900 mb-2">Open on Phone</h3>
-            <p className="text-sm text-blue-700 mb-4">Scan QR code to launch the app on your smartphone</p>
-            <div className="bg-white p-3 rounded-xl shadow-inner mb-4">
-              <img 
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(window.location.origin)}`} 
-                alt="QR Code"
-                className="w-32 h-32"
-                referrerPolicy="no-referrer"
-              />
-            </div>
-            <p className="text-xs text-blue-500 break-all">{window.location.origin}</p>
-          </div>
-
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">Child's Name</label>
             <input 
@@ -280,7 +280,18 @@ const ParentSettingsScreen = ({ profile, onSave, onBack }: { profile: ChildProfi
           </div>
 
           <button 
-            onClick={() => onSave(formData)}
+            onClick={() => {
+              if (formData.name.length < 2) {
+                setLocalError(formData.language.toLowerCase().includes('ru') ? "Введите имя ребенка" : "Please enter child's name");
+                return;
+              }
+              if (formData.parentPin.length !== 6) {
+                setLocalError(formData.language.toLowerCase().includes('ru') ? "PIN-код должен состоять из 6 цифр" : "PIN must be exactly 6 digits");
+                return;
+              }
+              setLocalError(null);
+              onSave(formData);
+            }}
             className="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-[0.98]"
           >
             Save and Lock
