@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Lock, Settings, User, Baby, Brain, CheckCircle2, XCircle, ChevronRight, LogOut, Mic, Volume2, AlertCircle, RefreshCcw, X } from 'lucide-react';
+import logo from './logo.png';
 import { AppView, ChildProfile, Task, TaskType } from './types';
 import { generateTask, evaluateAudio, evaluateTextAnswer } from './services/geminiService';
 
@@ -36,11 +37,11 @@ const PinScreen = ({ onUnlock, correctPin }: { onUnlock: () => void, correctPin:
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 text-center"
       >
-        <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-          <Lock className="text-blue-600 w-8 h-8" />
+        <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mx-auto mb-6 p-2 overflow-hidden shadow-sm border border-slate-100">
+          <img src={logo} alt="Learn2Unlock" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
         </div>
-        <h1 className="text-2xl font-bold text-slate-800 mb-2">Parental Control</h1>
-        <p className="text-slate-500 mb-8">Enter 6-digit PIN to access settings</p>
+        <h1 className="text-2xl font-black text-indigo-950 mb-2">Learn2Unlock</h1>
+        <p className="text-slate-500 mb-8 font-medium">Enter 6-digit PIN to access settings</p>
         
         <div className="flex justify-center gap-3 mb-10">
           {[0, 1, 2, 3, 4, 5].map((i) => (
@@ -83,11 +84,13 @@ const ParentSettingsScreen = ({ profile, onSave, onBack }: { profile: ChildProfi
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-            <Settings className="w-8 h-8 text-blue-600" />
-            Settings
-          </h1>
-          <button onClick={onBack} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center p-2 shadow-sm border border-slate-100">
+              <img src={logo} alt="L2U" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+            </div>
+            <h1 className="text-3xl font-black text-slate-900">Settings</h1>
+          </div>
+          <button onClick={onBack} className="p-3 hover:bg-slate-200 rounded-full transition-colors">
             <LogOut className="w-6 h-6 text-slate-500" />
           </button>
         </div>
@@ -235,20 +238,18 @@ const ParentSettingsScreen = ({ profile, onSave, onBack }: { profile: ChildProfi
 
 const ChildScreen = ({ profile, onStartTask, onParentMode }: { profile: ChildProfile, onStartTask: () => void, onParentMode: () => void }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 flex flex-col items-center justify-center p-6 text-white overflow-hidden relative">
-      {/* Decorative circles */}
-      <div className="absolute top-[-10%] left-[-10%] w-64 h-64 bg-white/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-64 h-64 bg-pink-400/20 rounded-full blur-3xl" />
-
+    <div className="min-h-screen bg-indigo-600 flex flex-col items-center justify-center p-6 text-white overflow-hidden relative">
+      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+      
       <motion.div 
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         className="text-center z-10"
       >
-        <div className="w-24 h-24 bg-white/20 backdrop-blur-md rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl">
-          <Baby className="w-12 h-12 text-white" />
+        <div className="w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-2xl p-4 overflow-hidden">
+          <img src={logo} alt="Logo" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
         </div>
-        <h1 className="text-4xl font-black mb-4 tracking-tight">Hi, {profile.name}! 👋</h1>
+        <h1 className="text-4xl font-black mb-4 tracking-tight drop-shadow-md">Hi, {profile.name}! 👋</h1>
         <p className="text-xl text-white/80 mb-12 max-w-xs mx-auto">To unlock the phone, you need to solve a few tasks!</p>
         
         <button 
@@ -424,14 +425,14 @@ const TaskScreen = ({ profile, onComplete, onParentMode }: { profile: ChildProfi
     return (
       <div className="min-h-screen bg-indigo-600 flex flex-col items-center justify-center p-6 text-white">
         <motion.div 
-          animate={{ rotate: 360 }}
-          transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-          className="mb-6"
+          animate={{ rotate: [0, 10, -10, 0] }}
+          transition={{ repeat: Infinity, duration: 2 }}
+          className="mb-8 w-24 h-24 bg-white rounded-3xl p-4 shadow-2xl overflow-hidden"
         >
-          <Brain className="w-16 h-16" />
+          <img src={logo} alt="Loading" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
         </motion.div>
-        <h2 className="text-2xl font-bold animate-pulse">
-          {solvedCount > 0 ? `Preparing task ${solvedCount + 1}...` : 'AI is thinking...'}
+        <h2 className="text-2xl font-black animate-pulse tracking-tight">
+          {solvedCount > 0 ? `Good job! Next task...` : 'Preparing your task...'}
         </h2>
       </div>
     );
@@ -545,50 +546,49 @@ const TaskScreen = ({ profile, onComplete, onParentMode }: { profile: ChildProfi
         {(task?.type === 'READING' || task?.type === 'RETELLING') && (
           <div className="space-y-6">
             <div className="flex flex-col items-center gap-4">
+              {isRecording && !audioBlob && (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex items-center gap-2 mb-2"
+                >
+                  <div className="flex gap-1 items-center h-4">
+                    {[1,2,3,4,5].map(i => (
+                      <motion.div 
+                        key={i}
+                        animate={{ height: [4, 16, 4] }}
+                        transition={{ repeat: Infinity, duration: 0.5, delay: i * 0.1 }}
+                        className="w-1 bg-red-500 rounded-full"
+                      />
+                    ))}
+                  </div>
+                  <span className="text-red-500 font-black text-xs uppercase tracking-tighter">Recording...</span>
+                </motion.div>
+              )}
+              
               {!audioBlob ? (
-                <>
+                <button 
+                  onMouseDown={startRecording}
+                  onMouseUp={stopRecording}
+                  onMouseLeave={stopRecording}
+                  onTouchStart={startRecording}
+                  onTouchEnd={stopRecording}
+                  onTouchCancel={stopRecording}
+                  className={`w-24 h-24 rounded-full flex items-center justify-center transition-all relative ${
+                    isRecording ? 'bg-red-500 scale-110 shadow-[0_0_40px_rgba(239,68,68,0.6)]' : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'
+                  }`}
+                >
                   {isRecording && (
                     <motion.div 
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="flex items-center gap-2 mb-2"
-                    >
-                      <div className="flex gap-1 items-center h-4">
-                        {[1,2,3,4,5].map(i => (
-                          <motion.div 
-                            key={i}
-                            animate={{ height: [4, 16, 4] }}
-                            transition={{ repeat: Infinity, duration: 0.5, delay: i * 0.1 }}
-                            className="w-1 bg-red-500 rounded-full"
-                          />
-                        ))}
-                      </div>
-                      <span className="text-red-500 font-black text-xs uppercase tracking-tighter">Recording...</span>
-                    </motion.div>
+                      layoutId="ring"
+                      initial={{ scale: 1, opacity: 0.5 }}
+                      animate={{ scale: 1.5, opacity: 0 }}
+                      transition={{ repeat: Infinity, duration: 1 }}
+                      className="absolute inset-0 rounded-full bg-red-500"
+                    />
                   )}
-                  <button 
-                    onMouseDown={startRecording}
-                    onMouseUp={stopRecording}
-                    onMouseLeave={stopRecording}
-                    onTouchStart={startRecording}
-                    onTouchEnd={stopRecording}
-                    onTouchCancel={stopRecording}
-                    className={`w-24 h-24 rounded-full flex items-center justify-center transition-all relative ${
-                      isRecording ? 'bg-red-500 scale-110 shadow-[0_0_40px_rgba(239,68,68,0.6)]' : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'
-                    }`}
-                  >
-                    {isRecording && (
-                      <motion.div 
-                        layoutId="ring"
-                        initial={{ scale: 1, opacity: 0.5 }}
-                        animate={{ scale: 1.5, opacity: 0 }}
-                        transition={{ repeat: Infinity, duration: 1 }}
-                        className="absolute inset-0 rounded-full bg-red-500"
-                      />
-                    )}
-                    <Mic className={`w-10 h-10 z-10 ${isRecording ? 'text-white' : ''}`} />
-                  </button>
-                </>
+                  <Mic className={`w-10 h-10 z-10 ${isRecording ? 'text-white' : ''}`} />
+                </button>
               ) : (
                 <div className="flex gap-4 w-full">
                   <button 

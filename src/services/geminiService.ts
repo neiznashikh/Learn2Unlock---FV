@@ -112,6 +112,16 @@ export async function generateTask(profile: ChildProfile): Promise<AIResult> {
 }
 
 export async function evaluateAudio(base64Audio: string, task: Task, profile: ChildProfile): Promise<{ success: boolean, feedback: string }> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || apiKey === 'undefined' || apiKey === '' || apiKey === 'MY_GEMINI_API_KEY') {
+    return { 
+      success: true, 
+      feedback: profile.language.toLowerCase().includes('ru') 
+        ? "ИИ не настроен, но ты молодец! (Добавьте API ключ в Secrets)" 
+        : "AI not configured, but you did great! (Add API key in Secrets)" 
+    };
+  }
+
   try {
     let prompt = "";
     if (task.type === 'READING') {
