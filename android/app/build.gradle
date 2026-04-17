@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.learn2unlock.app'
+    namespace 'com.learn2unlock.blocker'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.learn2unlock.app"
+        applicationId "com.learn2unlock.blocker"
         minSdk 24
         targetSdk 33
         versionCode 1
