@@ -1,7 +1,7 @@
 // Triggering full repository sync after accidental deletion
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Lock, Settings, User, Baby, Brain, CheckCircle2, XCircle, ChevronRight, LogOut, Mic, Volume2, AlertCircle, RefreshCcw, HelpCircle, Info } from 'lucide-react';
+import { Lock, Settings, User, Baby, Brain, CheckCircle2, XCircle, ChevronRight, LogOut, Mic, Volume2, AlertCircle, RefreshCcw, X } from 'lucide-react';
 import { AppView, ChildProfile, Task, TaskType } from './types';
 import { generateTask, evaluateAudio, evaluateTextAnswer } from './services/geminiService';
 
@@ -76,92 +76,21 @@ const PinScreen = ({ onUnlock, correctPin }: { onUnlock: () => void, correctPin:
 
 const ParentSettingsScreen = ({ profile, onSave, onBack }: { profile: ChildProfile, onSave: (p: ChildProfile) => void, onBack: () => void }) => {
   const [formData, setFormData] = useState<ChildProfile>(profile);
-  const [showGuide, setShowGuide] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
   return (
     <div className="min-h-screen bg-slate-50 p-6">
       <div className="max-w-2xl mx-auto">
-        {/* ... existing header ... */}
+        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
             <Settings className="w-8 h-8 text-blue-600" />
             Settings
           </h1>
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => setShowGuide(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl font-bold hover:bg-blue-100 transition-all"
-            >
-              <HelpCircle className="w-5 h-5" /> How to Lock?
-            </button>
-            <button onClick={onBack} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
-              <LogOut className="w-6 h-6 text-slate-500" />
-            </button>
-          </div>
+          <button onClick={onBack} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+            <LogOut className="w-6 h-6 text-slate-500" />
+          </button>
         </div>
-
-        <AnimatePresence>
-          {showGuide && (
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-6"
-            >
-              <motion.div 
-                initial={{ scale: 0.9, y: 20 }}
-                animate={{ scale: 1, y: 0 }}
-                className="bg-white rounded-[2.5rem] p-8 max-w-lg w-full shadow-2xl overflow-y-auto max-h-[90vh]"
-              >
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center">
-                    <Lock className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <h2 className="text-2xl font-black text-slate-800">Setup Guide</h2>
-                </div>
-
-                <div className="space-y-6 text-slate-600">
-                  <section>
-                    <h3 className="font-bold text-slate-800 mb-2 flex items-center gap-2">
-                      <span className="w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center text-xs">1</span>
-                      Enable App Pinning
-                    </h3>
-                    <p className="text-sm">Go to <b>Settings</b> → <b>Security</b> → <b>Other Security Settings</b> → <b>App Pinning</b>. Turn it ON.</p>
-                  </section>
-
-                  <section>
-                    <h3 className="font-bold text-slate-800 mb-2 flex items-center gap-2">
-                      <span className="w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center text-xs">2</span>
-                      Add to Home Screen
-                    </h3>
-                    <p className="text-sm">In Chrome, tap the <b>three dots (⋮)</b> and select <b>"Add to Home Screen"</b>. This makes the app look like a real app.</p>
-                  </section>
-
-                  <section>
-                    <h3 className="font-bold text-slate-800 mb-2 flex items-center gap-2">
-                      <span className="w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center text-xs">3</span>
-                      Pin the App
-                    </h3>
-                    <p className="text-sm">Open the app from your Home Screen. Swipe up (or press the square button) to see <b>Recent Apps</b>. Tap the <b>App Icon</b> at the top and select <b>"Pin"</b> (or "Закрепить").</p>
-                  </section>
-
-                  <div className="bg-amber-50 p-4 rounded-2xl border border-amber-100 flex gap-3">
-                    <Info className="w-5 h-5 text-amber-600 shrink-0" />
-                    <p className="text-xs text-amber-800">Once pinned, the child cannot exit the app without your phone's password or a special gesture.</p>
-                  </div>
-                </div>
-
-                <button 
-                  onClick={() => setShowGuide(false)}
-                  className="w-full mt-8 bg-slate-800 text-white py-4 rounded-2xl font-bold hover:bg-slate-900 transition-all"
-                >
-                  Got it!
-                </button>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 space-y-6">
           <div>
