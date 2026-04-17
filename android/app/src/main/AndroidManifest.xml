@@ -7,13 +7,14 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
-        android:label="EduBlocker"
+        android:icon="@drawable/logo"
+        android:label="Learn2Unlock"
         android:theme="@style/Theme.Learn2Unlock"
         android:testOnly="false">
 
         <activity
             android:name="com.learn2unlock.app.MainActivity"
-            android:label="EduBlocker"
+            android:label="Learn2Unlock"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

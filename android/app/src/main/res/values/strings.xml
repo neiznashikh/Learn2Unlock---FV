@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">EduBlocker</string>
-    <string name="accessibility_description">Locking apps for education purposes.</string>
-    <string name="parent_pin_hint">Parent PIN</string>
+    <string name="app_name">Learn2Unlock</string>
+    <string name="accessibility_description">Используется для блокировки приложений, пока ребенок не решит задания.</string>
+    <string name="parent_pin_hint">Введите PIN родителя</string>
 </resources>
