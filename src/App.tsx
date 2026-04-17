@@ -102,18 +102,6 @@ const ParentSettingsScreen = ({ profile, onSave, onBack }: { profile: ChildProfi
         </div>
 
         <AnimatePresence>
-          {localError && (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mb-6 bg-red-50 border-2 border-red-100 p-4 rounded-2xl flex items-center gap-3 text-red-600 font-bold overflow-hidden"
-            >
-              <AlertCircle className="w-6 h-6 shrink-0" />
-              {localError}
-            </motion.div>
-          )}
-        </AnimatePresence>
           {showGuide && (
             <motion.div 
               initial={{ opacity: 0 }} 
@@ -278,6 +266,20 @@ const ParentSettingsScreen = ({ profile, onSave, onBack }: { profile: ChildProfi
               placeholder="Minecraft, space, dinosaurs, robots..."
             />
           </div>
+
+          <AnimatePresence>
+            {localError && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="bg-red-50 border-2 border-red-100 p-4 rounded-2xl flex items-center gap-3 text-red-600 font-bold"
+              >
+                <AlertCircle className="w-6 h-6 shrink-0" />
+                {localError}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <button 
             onClick={() => {
