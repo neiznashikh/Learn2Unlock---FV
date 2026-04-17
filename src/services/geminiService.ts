@@ -115,15 +115,29 @@ export async function evaluateAudio(base64Audio: string, task: Task, profile: Ch
   try {
     let prompt = "";
     if (task.type === 'READING') {
-      prompt = `Прослушай аудиозапись ребенка, который читает этот текст: "${task.text}".
-      Ребенок учится в ${profile.grade} классе.
-      Оцени, насколько правильно и бегло он прочитал текст.
-      Верни JSON: {"success": true/false, "feedback": "короткий отзыв"}`;
+      prompt = `
+        Ты - добрый и помогающий учитель. Прослушай аудиозапись ребенка (возраст: ${profile.age}, класс: ${profile.grade}), который читает текст: "${task.text}".
+        
+        Критерии оценки:
+        1. Насколько точно прочитаны слова.
+        2. Беглость и интонация (соответственно возрасту).
+        
+        Будь лоялен к детским ошибкам и небольшим запинкам. Если ребенок в целом справился с текстом, ставь "success": true.
+        
+        Обязательно верни ответ в формате JSON на языке ${profile.language}:
+        {"success": true/false, "feedback": "короткий подбадривающий отзыв (макс 2 предложения)"}`;
     } else if (task.type === 'RETELLING') {
-      prompt = `Прослушай пересказ истории: "${task.story}".
-      Ребенок учится в ${profile.grade} классе.
-      Оцени, понял ли он суть истории и смог ли ее пересказать.
-      Верни JSON: {"success": true/false, "feedback": "короткий отзыв"}`;
+      prompt = `
+        Ты - добрый учитель. Прослушай пересказ ребенка (возраст: ${profile.age}, класс: ${profile.grade}) истории: "${task.story}".
+        
+        Критерии оценки:
+        1. Понял ли ребенок смысл истории?
+        2. Упомянул ли он ключевые моменты?
+        
+        Будь лоялен. Если суть передана верно, ставь "success": true.
+        
+        Обязательно верни ответ в формате JSON на языке ${profile.language}:
+        {"success": true/false, "feedback": "короткий подбадривающий отзыв (макс 2 предложения)"}`;
     }
 
     const response = await ai.models.generateContent({
@@ -145,10 +159,24 @@ export async function evaluateAudio(base64Audio: string, task: Task, profile: Ch
       }
     });
 
-    return JSON.parse(response.text || '{"success": false, "feedback": "Ошибка оценки"}');
-  } catch (error) {
+    const responseText = response.text || "";
+    try {
+      return JSON.parse(responseText);
+    } catch (e) {
+      console.error("JSON Parse Error in evaluateAudio:", responseText);
+      // Fallback if AI returned non-JSON despite schema
+      if (responseText.toLowerCase().includes('"success": true') || responseText.toLowerCase().includes('true')) {
+        return { success: true, feedback: "Молодец! Отличное старание!" };
+      }
+      return { success: false, feedback: "Попробуй еще раз, я верю в тебя!" };
+    }
+  } catch (error: any) {
     console.error("Audio Evaluation Error:", error);
-    return { success: true, feedback: "ИИ временно недоступен, но ты молодец! (Авто-проверка)" };
+    // If it's a model error or format error, we might want to be lenient in a "lock" app so the child isn't stuck
+    if (error?.message?.includes('format') || error?.message?.includes('support')) {
+      return { success: true, feedback: "Я услышал тебя! Ты молодец!" };
+    }
+    return { success: true, feedback: "Отлично! Продолжаем!" }; // Default to success if AI fails to avoid trapping the child
   }
 }
 

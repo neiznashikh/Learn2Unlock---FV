@@ -305,42 +305,68 @@ const TaskScreen = ({ profile, onComplete, onParentMode }: { profile: ChildProfi
 
   const startRecording = async () => {
     try {
+      setAudioBlob(null);
+      setFeedback(null);
+      setAiError(null);
+      
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const recorder = new MediaRecorder(stream);
       const chunks: BlobPart[] = [];
       
-      recorder.ondataavailable = (e) => chunks.push(e.data);
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunks.push(e.data);
+      };
+      
       recorder.onstop = () => {
         const blob = new Blob(chunks, { type: 'audio/webm' });
-        setAudioBlob(blob);
+        if (blob.size > 0) {
+          setAudioBlob(blob);
+        } else {
+          setAiError("Audio was too short. Try again.");
+        }
       };
       
       recorder.start();
       setMediaRecorder(recorder);
       setIsRecording(true);
     } catch (err) {
-      console.error("Microphone access denied", err);
-      alert("Microphone access is required!");
+      console.error("Microphone access denied or error", err);
+      setAiError("Microphone access is required!");
+      setIsRecording(false);
     }
   };
 
   const stopRecording = () => {
-    if (mediaRecorder) {
-      mediaRecorder.stop();
+    if (isRecording) {
       setIsRecording(false);
-      mediaRecorder.stream.getTracks().forEach(t => t.stop());
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+        mediaRecorder.stream.getTracks().forEach(t => t.stop());
+      }
+      setMediaRecorder(null);
     }
   };
 
   const handleAudioSubmit = async () => {
     if (!audioBlob || !task) return;
     setEvaluating(true);
+    setFeedback(null);
+    setAiError(null);
     
-    // Convert blob to base64
-    const reader = new FileReader();
-    reader.readAsDataURL(audioBlob);
-    reader.onloadend = async () => {
-      const base64Audio = (reader.result as string).split(',')[1];
+    try {
+      // Convert blob to base64
+      const reader = new FileReader();
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onloadend = () => {
+          const base64 = (reader.result as string).split(',')[1];
+          resolve(base64);
+        };
+        reader.onerror = reject;
+      });
+      
+      reader.readAsDataURL(audioBlob);
+      const base64Audio = await base64Promise;
+      
       const evaluation = await evaluateAudio(base64Audio, task, profile);
       
       setEvaluating(false);
@@ -358,7 +384,11 @@ const TaskScreen = ({ profile, onComplete, onParentMode }: { profile: ChildProfi
         setStatus('wrong');
         setTimeout(() => setStatus('idle'), 2000);
       }
-    };
+    } catch (err: any) {
+      console.error("Audio conversion/evaluation failed", err);
+      setAiError("Evaluation failed. Please try again or retake.");
+      setEvaluating(false);
+    }
   };
 
   const checkAnswer = async () => {
@@ -515,47 +545,50 @@ const TaskScreen = ({ profile, onComplete, onParentMode }: { profile: ChildProfi
         {(task?.type === 'READING' || task?.type === 'RETELLING') && (
           <div className="space-y-6">
             <div className="flex flex-col items-center gap-4">
-              {isRecording && (
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="flex items-center gap-2 mb-2"
-                >
-                  <div className="flex gap-1 items-center h-4">
-                    {[1,2,3,4,5].map(i => (
-                      <motion.div 
-                        key={i}
-                        animate={{ height: [4, 16, 4] }}
-                        transition={{ repeat: Infinity, duration: 0.5, delay: i * 0.1 }}
-                        className="w-1 bg-red-500 rounded-full"
-                      />
-                    ))}
-                  </div>
-                  <span className="text-red-500 font-black text-xs uppercase tracking-tighter">Recording...</span>
-                </motion.div>
-              )}
-
               {!audioBlob ? (
-                <button 
-                  onMouseDown={startRecording}
-                  onMouseUp={stopRecording}
-                  onTouchStart={startRecording}
-                  onTouchEnd={stopRecording}
-                  className={`w-24 h-24 rounded-full flex items-center justify-center transition-all relative ${
-                    isRecording ? 'bg-red-500 scale-110 shadow-[0_0_40px_rgba(239,68,68,0.6)]' : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'
-                  }`}
-                >
+                <>
                   {isRecording && (
                     <motion.div 
-                      layoutId="ring"
-                      initial={{ scale: 1, opacity: 0.5 }}
-                      animate={{ scale: 1.5, opacity: 0 }}
-                      transition={{ repeat: Infinity, duration: 1 }}
-                      className="absolute inset-0 rounded-full bg-red-500"
-                    />
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="flex items-center gap-2 mb-2"
+                    >
+                      <div className="flex gap-1 items-center h-4">
+                        {[1,2,3,4,5].map(i => (
+                          <motion.div 
+                            key={i}
+                            animate={{ height: [4, 16, 4] }}
+                            transition={{ repeat: Infinity, duration: 0.5, delay: i * 0.1 }}
+                            className="w-1 bg-red-500 rounded-full"
+                          />
+                        ))}
+                      </div>
+                      <span className="text-red-500 font-black text-xs uppercase tracking-tighter">Recording...</span>
+                    </motion.div>
                   )}
-                  <Mic className={`w-10 h-10 z-10 ${isRecording ? 'text-white' : ''}`} />
-                </button>
+                  <button 
+                    onMouseDown={startRecording}
+                    onMouseUp={stopRecording}
+                    onMouseLeave={stopRecording}
+                    onTouchStart={startRecording}
+                    onTouchEnd={stopRecording}
+                    onTouchCancel={stopRecording}
+                    className={`w-24 h-24 rounded-full flex items-center justify-center transition-all relative ${
+                      isRecording ? 'bg-red-500 scale-110 shadow-[0_0_40px_rgba(239,68,68,0.6)]' : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'
+                    }`}
+                  >
+                    {isRecording && (
+                      <motion.div 
+                        layoutId="ring"
+                        initial={{ scale: 1, opacity: 0.5 }}
+                        animate={{ scale: 1.5, opacity: 0 }}
+                        transition={{ repeat: Infinity, duration: 1 }}
+                        className="absolute inset-0 rounded-full bg-red-500"
+                      />
+                    )}
+                    <Mic className={`w-10 h-10 z-10 ${isRecording ? 'text-white' : ''}`} />
+                  </button>
+                </>
               ) : (
                 <div className="flex gap-4 w-full">
                   <button 
