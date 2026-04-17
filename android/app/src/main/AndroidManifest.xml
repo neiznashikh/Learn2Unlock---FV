@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.learn.blocker.final">
+    package="com.learn.blocker.safeapp">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
@@ -12,7 +12,7 @@
         android:testOnly="false">
 
         <activity
-            android:name="com.learn.blocker.final.MainActivity"
+            android:name="com.learn.blocker.safeapp.MainActivity"
             android:label="Learn2Unlock"
             android:exported="true">
             <intent-filter>
@@ -22,7 +22,7 @@
         </activity>
 
         <service
-            android:name="com.learn.blocker.final.services.AppBlockService"
+            android:name="com.learn.blocker.safeapp.services.AppBlockService"
             android:label="Learn2Unlock Blocker"
             android:description="@string/accessibility_description"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"

@@ -1,4 +1,4 @@
-package com.learn.blocker.final
+package com.learn.blocker.safeapp
 
 import android.content.Context
 import android.content.Intent
@@ -10,7 +10,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.learn.blocker.final.services.AppBlockService
+import com.learn.blocker.safeapp.services.AppBlockService
 
 class MainActivity : AppCompatActivity() {
 

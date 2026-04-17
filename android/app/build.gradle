@@ -4,15 +4,15 @@ plugins {
 }
 
 android {
-    namespace 'com.learn.blocker.final'
+    namespace 'com.learn.blocker.safeapp'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.learn.blocker.final"
+        applicationId "com.learn.blocker.safeapp"
         minSdk 24
         targetSdk 33
-        versionCode 200
-        versionName "3.0"
+        versionCode 201
+        versionName "3.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
