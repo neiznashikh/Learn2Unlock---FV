@@ -1,2 +1,0 @@
-This file is here to make the folder visible. 
-Please upload your ic_launcher.png to this folder and then you can delete this file.
