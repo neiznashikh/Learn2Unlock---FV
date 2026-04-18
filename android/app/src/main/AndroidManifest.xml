@@ -14,7 +14,7 @@
 
     <application
         android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:label="Learn2Unlock"
         android:theme="@style/Theme.Learn2Unlock"
         android:usesCleartextTraffic="true"
