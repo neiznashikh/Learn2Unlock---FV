@@ -1,2 +1,2 @@
 # Sync trigger src
-# Mipmap folders created and Manifest updated. Ready for replacement: 2026-04-18 06:57
+# Duplicate XML removed, PNG should now be primary: 2026-04-18 07:08
