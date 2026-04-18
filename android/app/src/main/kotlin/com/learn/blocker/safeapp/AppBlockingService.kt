@@ -12,10 +12,13 @@ import androidx.core.app.NotificationCompat
 import java.util.*
 
 class AppBlockingService : Service() {
-
     private val handler = Handler(Looper.getMainLooper())
     private var isRunning = false
     private val checkInterval = 1000L // 1 second
+    
+    private var lastUnlockedPackage: String? = null
+    private var lastUnlockTime: Long = 0
+    private val gracePeriod = 60000L // 1 minute of grace time after unlock
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -27,6 +30,14 @@ class AppBlockingService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val action = intent?.action
+        val pkg = intent?.getStringExtra("PACKAGE_NAME")
+        
+        if (action == "UNLOCK_PACKAGE" && pkg != null) {
+            lastUnlockedPackage = pkg
+            lastUnlockTime = System.currentTimeMillis()
+        }
+
         if (!isRunning) {
             isRunning = true
             startMonitoring()
@@ -48,9 +59,16 @@ class AppBlockingService : Service() {
     private fun checkTopApp() {
         val topPackage = getTopPackageName()
         if (topPackage != null && isAppBlocked(topPackage)) {
-            // Check if our app is not already showing the lock screen
+            // Check if it's the package we just unlocked
+            val currentTime = System.currentTimeMillis()
+            if (topPackage == lastUnlockedPackage && (currentTime - lastUnlockTime) < gracePeriod) {
+                return // Still in grace period
+            }
+            
+            // Re-block if we are not in our own app
             if (topPackage != packageName) {
-                launchLockScreen()
+                lastUnlockedPackage = null // Clear unlock state
+                launchLockScreen(topPackage)
             }
         }
     }
@@ -73,11 +91,12 @@ class AppBlockingService : Service() {
         return blockedApps?.contains(packageName) == true
     }
 
-    private fun launchLockScreen() {
+    private fun launchLockScreen(targetPackage: String) {
         val intent = Intent(this, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
         intent.putExtra("IS_LOCK_SCREEN", true)
+        intent.putExtra("TARGET_PACKAGE", targetPackage)
         startActivity(intent)
     }
 

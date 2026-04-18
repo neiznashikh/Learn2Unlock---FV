@@ -177,8 +177,16 @@ class MainActivity : AppCompatActivity() {
         
         @JavascriptInterface
         fun unlockCurrentApp() {
-            // Временно отключаем блокировку до следующего переоткрытия приложения
-            // Это будет вызываться из JS после решения задачи
+            // Отправляем сигнал сервису разблокировки
+            val targetPkg = intent.getStringExtra("TARGET_PACKAGE")
+            if (targetPkg != null) {
+                val serviceIntent = Intent(mContext, AppBlockingService::class.java)
+                serviceIntent.action = "UNLOCK_PACKAGE"
+                serviceIntent.putExtra("PACKAGE_NAME", targetPkg)
+                mContext.startService(serviceIntent)
+            }
+            
+            // Сворачиваем наше приложение, чтобы вернуться к заблокированному
             moveTaskToBack(true)
         }
     }
