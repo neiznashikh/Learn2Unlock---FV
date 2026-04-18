@@ -1,13 +1,16 @@
 // Triggering full repository sync after accidental deletion
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Lock, Settings, User, Baby, Brain, CheckCircle2, XCircle, ChevronRight, LogOut, Mic, Volume2, AlertCircle, RefreshCcw, X } from 'lucide-react';
-import logo from './logo.png';
+import { AnimatePresence, motion } from 'motion/react';
+import { 
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+} from 'recharts';
+import { 
+  Lock, Settings, User, Baby, Brain, CheckCircle2, XCircle, ChevronRight, LogOut, Mic, Volume2, AlertCircle, RefreshCcw, X 
+} from 'lucide-react';
 import { AppView, ChildProfile, Task, TaskType } from './types';
 import { generateTask, evaluateAudio, evaluateTextAnswer, generateSpeech } from './services/geminiService';
-import { 
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell
-} from 'recharts';
+
+const LOGO_URL = "https://cdn-icons-png.flaticon.com/512/3449/3449673.png";
 
 // --- Components ---
 
@@ -40,8 +43,8 @@ const PinScreen = ({ onUnlock, correctPin }: { onUnlock: () => void, correctPin:
         animate={{ opacity: 1, scale: 1 }}
         className="w-full max-w-md bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-10 text-center border border-white/50 backdrop-blur-sm"
       >
-        <div className="w-24 h-24 bg-white rounded-3xl flex items-center justify-center mx-auto mb-8 p-3 overflow-hidden shadow-xl shadow-indigo-100 border border-slate-100">
-          <img src={logo} alt="Learn2Unlock" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+        <div className="w-24 h-24 bg-white rounded-3xl flex items-center justify-center mx-auto mb-8 p-3 overflow-hidden shadow-xl shadow-indigo-100 border border-slate-100/50">
+          <img src={LOGO_URL} alt="Learn2Unlock" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
         </div>
         <h1 className="text-3xl font-display font-black text-indigo-950 mb-2">Learn2Unlock</h1>
         <p className="text-slate-500 mb-10 font-medium">Enter 6-digit PIN to access settings</p>
@@ -90,7 +93,7 @@ const ParentSettingsScreen = ({ profile, onSave, onBack }: { profile: ChildProfi
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center p-2 shadow-sm border border-slate-100">
-              <img src={logo} alt="L2U" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+              <img src={LOGO_URL} alt="L2U" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
             </div>
             <div>
               <h1 className="text-3xl font-display font-black text-slate-900 leading-none mb-1">Settings</h1>
@@ -306,7 +309,7 @@ const ChildScreen = ({ profile, onStartTask, onParentMode }: { profile: ChildPro
         className="text-center z-10"
       >
         <div className="w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-2xl p-4 overflow-hidden">
-          <img src={logo} alt="Logo" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+          <img src={LOGO_URL} alt="Logo" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
         </div>
         <h1 className="text-4xl font-black mb-4 tracking-tight drop-shadow-md">Hi, {profile.name}! 👋</h1>
         <p className="text-xl text-white/80 mb-12 max-w-xs mx-auto">To unlock the phone, you need to solve a few tasks!</p>
@@ -509,7 +512,7 @@ const TaskScreen = ({ profile, onComplete, onParentMode }: { profile: ChildProfi
           transition={{ repeat: Infinity, duration: 2 }}
           className="mb-8 w-24 h-24 bg-white rounded-3xl p-4 shadow-2xl overflow-hidden"
         >
-          <img src={logo} alt="Loading" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+          <img src={LOGO_URL} alt="Loading" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
         </motion.div>
         <h2 className="text-2xl font-black animate-pulse tracking-tight">
           {solvedCount > 0 ? `Good job! Next task...` : 'Preparing your task...'}
