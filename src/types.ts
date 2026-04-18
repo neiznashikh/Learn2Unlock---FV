@@ -1,9 +1,10 @@
-export type TaskType = 'SCHOOL_MATH' | 'LOGIC' | 'READING' | 'RETELLING';
+export type TaskType = 'SCHOOL_MATH' | 'LOGIC' | 'READING' | 'RETELLING' | 'SCIENCE' | 'LANGUAGES';
 
 export interface HistoryEntry {
   date: string;
   tasksSolved: number;
   subject: TaskType;
+  successRate: number; // 0 to 1
 }
 
 export interface ChildProfile {
@@ -11,15 +12,16 @@ export interface ChildProfile {
   age: number;
   grade: number;
   interests: string;
-  language: string; // Dynamic language input
+  language: string; 
   taskCount: number;
   preferredTaskType: TaskType;
   parentPin: string;
   history?: HistoryEntry[];
+  skills?: Record<TaskType, number>; // Level 1-10
 }
 
 export interface MathTask {
-  type: 'SCHOOL_MATH' | 'LOGIC';
+  type: 'SCHOOL_MATH' | 'LOGIC' | 'SCIENCE' | 'LANGUAGES';
   question: string;
   answer: string;
 }

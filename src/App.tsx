@@ -5,6 +5,9 @@ import { Lock, Settings, User, Baby, Brain, CheckCircle2, XCircle, ChevronRight,
 import logo from './logo.png';
 import { AppView, ChildProfile, Task, TaskType } from './types';
 import { generateTask, evaluateAudio, evaluateTextAnswer, generateSpeech } from './services/geminiService';
+import { 
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell
+} from 'recharts';
 
 // --- Components ---
 
@@ -107,7 +110,8 @@ const ParentSettingsScreen = ({ profile, onSave, onBack }: { profile: ChildProfi
                 <CheckCircle2 className="w-6 h-6 text-green-500" />
                 Progress Report
               </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
                 <div className="bg-slate-50 p-4 rounded-2xl">
                   <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Solved</p>
                   <p className="text-3xl font-display font-black text-indigo-600">
@@ -115,17 +119,34 @@ const ParentSettingsScreen = ({ profile, onSave, onBack }: { profile: ChildProfi
                   </p>
                 </div>
                 <div className="bg-slate-50 p-4 rounded-2xl">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Avg Accuracy</p>
+                  <p className="text-3xl font-display font-black text-indigo-600">
+                    {Math.round((profile.history.reduce((acc, curr) => acc + (curr.successRate || 1), 0) / profile.history.length) * 100)}%
+                  </p>
+                </div>
+                <div className="bg-slate-50 p-4 rounded-2xl">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Current Level</p>
+                  <p className="text-3xl font-display font-black text-indigo-600">{profile.skills?.[profile.preferredTaskType] || 1}</p>
+                </div>
+                <div className="bg-slate-50 p-4 rounded-2xl">
                   <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Sessions</p>
                   <p className="text-3xl font-display font-black text-indigo-600">{profile.history.length}</p>
                 </div>
-                <div className="bg-slate-50 p-4 rounded-2xl">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Last Date</p>
-                  <p className="text-sm font-black text-indigo-600 truncate">{new Date(profile.history[profile.history.length - 1].date).toLocaleDateString()}</p>
-                </div>
-                <div className="bg-slate-50 p-4 rounded-2xl">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Main Skill</p>
-                  <p className="text-sm font-black text-indigo-600 uppercase">{profile.preferredTaskType.split('_')[0]}</p>
-                </div>
+              </div>
+
+              <div className="h-64 w-full">
+                <p className="text-sm font-bold text-slate-500 mb-4">Task Resolution History</p>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={profile.history.map(h => ({ ...h, date: new Date(h.date).toLocaleDateString() }))}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="date" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
+                    <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
+                    <Tooltip 
+                      contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                    />
+                    <Line type="monotone" dataKey="tasksSolved" stroke="#4f46e5" strokeWidth={3} dot={{ fill: '#4f46e5', strokeWidth: 2, r: 4 }} activeDot={{ r: 6 }} />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
             </div>
           )}
@@ -188,6 +209,8 @@ const ParentSettingsScreen = ({ profile, onSave, onBack }: { profile: ChildProfi
                 <option value="LOGIC">Logic Puzzles</option>
                 <option value="READING">Reading Aloud</option>
                 <option value="RETELLING">Retelling Text</option>
+                <option value="SCIENCE">Science & Nature</option>
+                <option value="LANGUAGES">Foreign Languages</option>
               </select>
             </div>
           </div>
@@ -534,12 +557,14 @@ const TaskScreen = ({ profile, onComplete, onParentMode }: { profile: ChildProfi
           <span className="font-bold text-indigo-600 uppercase tracking-wider text-sm">
             {task?.type === 'SCHOOL_MATH' ? 'School Math' : 
              task?.type === 'LOGIC' ? 'Logic Puzzle' :
+             task?.type === 'SCIENCE' ? 'Science & Nature' :
+             task?.type === 'LANGUAGES' ? 'Languages' :
              task?.type === 'READING' ? 'Reading Aloud' : 'Retelling'}
           </span>
         </div>
 
         <div className="mb-6 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
-          {(task?.type === 'SCHOOL_MATH' || task?.type === 'LOGIC') && (
+          {(task?.type === 'SCHOOL_MATH' || task?.type === 'LOGIC' || task?.type === 'SCIENCE' || task?.type === 'LANGUAGES') && (
             <p className="text-2xl font-bold leading-tight text-slate-700">{task.question}</p>
           )}
           {task?.type === 'READING' && (
@@ -576,7 +601,7 @@ const TaskScreen = ({ profile, onComplete, onParentMode }: { profile: ChildProfi
           )}
         </div>
 
-        {(task?.type === 'SCHOOL_MATH' || task?.type === 'LOGIC') && (
+        {(task?.type === 'SCHOOL_MATH' || task?.type === 'LOGIC' || task?.type === 'SCIENCE' || task?.type === 'LANGUAGES') && (
           <div className="space-y-4 mb-6">
             <div className="relative">
               <input 
@@ -713,7 +738,7 @@ const TaskScreen = ({ profile, onComplete, onParentMode }: { profile: ChildProfi
           </div>
         )}
 
-        {(task?.type === 'SCHOOL_MATH' || task?.type === 'LOGIC') && (
+        {(task?.type === 'SCHOOL_MATH' || task?.type === 'LOGIC' || task?.type === 'SCIENCE' || task?.type === 'LANGUAGES') && (
           <div className="flex gap-4">
             <button 
               onClick={loadTask}
@@ -802,7 +827,9 @@ export default function App() {
       language: 'Russian',
       taskCount: 3,
       preferredTaskType: 'SCHOOL_MATH',
-      parentPin: ''
+      parentPin: '',
+      skills: {} as any,
+      history: []
     };
     const saved = localStorage.getItem('child_profile');
     return saved ? { ...defaultProfile, ...JSON.parse(saved) } : defaultProfile;
@@ -816,15 +843,27 @@ export default function App() {
   };
 
   const recordSuccess = () => {
+    const currentSubject = profile.preferredTaskType;
+    const currentSkills = profile.skills || {} as Record<TaskType, number>;
+    const currentLevel = currentSkills[currentSubject] || 1;
+    
+    // Simple adaptive logic: increment level if session was successful (which it is here)
+    const newLevel = Math.min(10, currentLevel + 0.1); // Slow progression 
+
     const newEntry = {
       date: new Date().toISOString(),
       tasksSolved: profile.taskCount,
-      subject: profile.preferredTaskType
+      subject: currentSubject,
+      successRate: 1 // In this screen, they only finish if they got them all right eventually
     };
     
     const updatedProfile = {
       ...profile,
-      history: [...(profile.history || []), newEntry].slice(-20) // Keep last 20 sessions
+      skills: {
+        ...currentSkills,
+        [currentSubject]: parseFloat(newLevel.toFixed(1))
+      },
+      history: [...(profile.history || []), newEntry].slice(-20)
     };
     
     setProfile(updatedProfile);

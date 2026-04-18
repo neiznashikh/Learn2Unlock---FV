@@ -26,9 +26,12 @@ export async function generateTask(profile: ChildProfile): Promise<AIResult> {
     let prompt = "";
     let responseSchema: any = {};
 
+    const level = profile.skills?.[profile.preferredTaskType] || 1;
+    const commonContext = `Grade: ${profile.grade}. Age: ${profile.age}. Interests: ${profile.interests}. Language: ${profile.language}. Adaptive Skill Level: ${level}/10. 10 is very hard, 1 is basics.`;
+
     if (profile.preferredTaskType === 'SCHOOL_MATH') {
       prompt = `Create a school math problem for a child.
-      Grade: ${profile.grade}. Age: ${profile.age}. Interests: ${profile.interests}. Language: ${profile.language}.
+      ${commonContext}
       The task must strictly follow the school curriculum for grade ${profile.grade}.
       Return JSON: {"type": "SCHOOL_MATH", "question": "task text", "answer": "number"}`;
       responseSchema = {
@@ -42,7 +45,7 @@ export async function generateTask(profile: ChildProfile): Promise<AIResult> {
       };
     } else if (profile.preferredTaskType === 'LOGIC') {
       prompt = `Create a logic puzzle or brain teaser for a child.
-      Age: ${profile.age}. Interests: ${profile.interests}. Language: ${profile.language}.
+      ${commonContext}
       The task should be age-appropriate and focus on logical thinking, not just school math.
       Return JSON: {"type": "LOGIC", "question": "puzzle text", "answer": "number or short word"}`;
       responseSchema = {
@@ -54,9 +57,37 @@ export async function generateTask(profile: ChildProfile): Promise<AIResult> {
         },
         required: ["type", "question", "answer"]
       };
+    } else if (profile.preferredTaskType === 'SCIENCE') {
+      prompt = `Create a science question (biology, physics, chemistry or space) for a child.
+      ${commonContext}
+      Focus on interesting facts suitable for grade ${profile.grade}.
+      Return JSON: {"type": "SCIENCE", "question": "question text", "answer": "one or two word answer"}`;
+      responseSchema = {
+        type: Type.OBJECT,
+        properties: {
+          type: { type: Type.STRING },
+          question: { type: Type.STRING },
+          answer: { type: Type.STRING }
+        },
+        required: ["type", "question", "answer"]
+      };
+    } else if (profile.preferredTaskType === 'LANGUAGES') {
+      prompt = `Create a foreign language learning task (translating a simple word or phrase).
+      ${commonContext}
+      If the child's main language is ${profile.language}, ask them to translate a simple common word from/to English or another language.
+      Return JSON: {"type": "LANGUAGES", "question": "translate: word", "answer": "translated word"}`;
+      responseSchema = {
+        type: Type.OBJECT,
+        properties: {
+          type: { type: Type.STRING },
+          question: { type: Type.STRING },
+          answer: { type: Type.STRING }
+        },
+        required: ["type", "question", "answer"]
+      };
     } else if (profile.preferredTaskType === 'READING') {
       prompt = `Create a short text for reading aloud.
-      Grade: ${profile.grade}. Interests: ${profile.interests}. Language: ${profile.language}.
+      ${commonContext}
       The text should be interesting and appropriate for grade ${profile.grade}.
       Return JSON: {"type": "READING", "text": "text to read"}`;
       responseSchema = {
@@ -69,6 +100,7 @@ export async function generateTask(profile: ChildProfile): Promise<AIResult> {
       };
     } else {
       prompt = `Create a very short story for the child to retell.
+      ${commonContext}
       Grade: ${profile.grade}. Interests: ${profile.interests}. Language: ${profile.language}.
       Return JSON: {"type": "RETELLING", "story": "story to retell"}`;
       responseSchema = {
