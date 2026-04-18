@@ -10,7 +10,7 @@ import {
 import { AppView, ChildProfile, Task, TaskType } from './types';
 import { generateTask, evaluateAudio, evaluateTextAnswer, generateSpeech } from './services/geminiService';
 
-const LOGO_URL = "https://cdn-icons-png.flaticon.com/512/3449/3449673.png";
+const LOGO_URL = "/logo.png";
 
 // --- Components ---
 
