@@ -1,2 +1,2 @@
 # Sync trigger src
-# Fixing re-blocking loop with grace period: 2026-04-18 06:07
+# Radically solving the re-blocking issue with onNewIntent and persistent unlock: 2026-04-18 06:17

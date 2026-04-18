@@ -16,9 +16,8 @@ class AppBlockingService : Service() {
     private var isRunning = false
     private val checkInterval = 1000L // 1 second
     
-    private var lastUnlockedPackage: String? = null
-    private var lastUnlockTime: Long = 0
-    private val gracePeriod = 60000L // 1 minute of grace time after unlock
+    private var currentlyUnlockedPackage: String? = null
+    private var lastCheckTime: Long = 0
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -34,8 +33,7 @@ class AppBlockingService : Service() {
         val pkg = intent?.getStringExtra("PACKAGE_NAME")
         
         if (action == "UNLOCK_PACKAGE" && pkg != null) {
-            lastUnlockedPackage = pkg
-            lastUnlockTime = System.currentTimeMillis()
+            currentlyUnlockedPackage = pkg
         }
 
         if (!isRunning) {
@@ -57,18 +55,26 @@ class AppBlockingService : Service() {
     }
 
     private fun checkTopApp() {
-        val topPackage = getTopPackageName()
-        if (topPackage != null && isAppBlocked(topPackage)) {
-            // Check if it's the package we just unlocked
-            val currentTime = System.currentTimeMillis()
-            if (topPackage == lastUnlockedPackage && (currentTime - lastUnlockTime) < gracePeriod) {
-                return // Still in grace period
-            }
-            
-            // Re-block if we are not in our own app
-            if (topPackage != packageName) {
-                lastUnlockedPackage = null // Clear unlock state
-                launchLockScreen(topPackage)
+        val topPackage = getTopPackageName() ?: return
+        
+        // If we are in our own app, don't do anything
+        if (topPackage == packageName) return
+
+        // If it's the package we just unlocked, we're good
+        if (topPackage == currentlyUnlockedPackage) {
+            return
+        }
+        
+        if (isAppBlocked(topPackage)) {
+            // New blocked app (or left the unlocked one and came back)
+            currentlyUnlockedPackage = null
+            launchLockScreen(topPackage)
+        } else {
+            // User went to home screen or another non-blocked app
+            // We clear the unlock state if they spend more than a few seconds elsewhere
+            // or if it's clearly a different app (not system UI)
+            if (topPackage != "com.android.systemui") {
+                currentlyUnlockedPackage = null
             }
         }
     }

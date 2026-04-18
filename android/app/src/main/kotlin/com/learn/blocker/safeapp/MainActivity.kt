@@ -55,11 +55,7 @@ class MainActivity : AppCompatActivity() {
         }
         
         webView.settings.cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
-        var finalUrl = "https://ais-pre-ehhpukwzjqxnwrvn73fvkk-366435121233.europe-west1.run.app"
-        if (intent.getBooleanExtra("IS_LOCK_SCREEN", false)) {
-            finalUrl += "?lock=true"
-        }
-        webView.loadUrl(finalUrl) 
+        loadAppUrl(intent.getBooleanExtra("IS_LOCK_SCREEN", false))
 
         setContentView(webView)
 
@@ -96,6 +92,23 @@ class MainActivity : AppCompatActivity() {
         } else {
             startService(serviceIntent)
         }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        if (intent != null) {
+            setIntent(intent)
+            val isLock = intent.getBooleanExtra("IS_LOCK_SCREEN", false)
+            loadAppUrl(isLock)
+        }
+    }
+
+    private fun loadAppUrl(isLock: Boolean) {
+        var finalUrl = "https://ais-pre-ehhpukwzjqxnwrvn73fvkk-366435121233.europe-west1.run.app"
+        if (isLock) {
+            finalUrl += "?lock=true&t=" + System.currentTimeMillis()
+        }
+        webView.loadUrl(finalUrl)
     }
 
     override fun onBackPressed() {
