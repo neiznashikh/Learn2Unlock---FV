@@ -17,7 +17,7 @@ class AppBlockingService : Service() {
     private var isRunning = false
     private val checkInterval = 1000L // 1 second
 
-    override fun onBind(intent: IBinder?): IBinder? = null
+    override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onCreate() {
         super.onCreate()

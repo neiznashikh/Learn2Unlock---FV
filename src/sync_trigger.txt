@@ -1,2 +1,2 @@
 # Sync trigger src
-# Fixing Android build error (specialUse incompatibility): 2026-04-18 04:00
+# Fixing Kotlin onBind signature error: 2026-04-18 04:03
