@@ -1,2 +1,3 @@
 # Sync trigger src
-# Final cleanup: placeholder.txt removed to fix build error: 2026-04-18 07:26
+# Sync trigger src
+# Build unblocked with fallback XML icon. Folder is now visible for PNG upload: 2026-04-18 07:29
