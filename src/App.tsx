@@ -155,6 +155,14 @@ const ParentSettingsScreen = ({ profile, onSave, onBack, onManageApps }: { profi
           )}
 
           <div className="bg-white rounded-[2rem] shadow-sm border border-slate-200 p-8 space-y-6">
+          <button 
+            onClick={onManageApps}
+            className="w-full bg-indigo-50 text-indigo-700 py-5 rounded-2xl font-black text-lg hover:bg-indigo-100 transition-all flex items-center justify-center gap-3 border-2 border-indigo-100/50 shadow-sm group"
+          >
+            <ShieldCheck className="w-7 h-7 group-hover:scale-110 transition-transform" />
+            Manage Apps & Permissions
+          </button>
+
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">Child's Name</label>
             <input 
@@ -273,14 +281,6 @@ const ParentSettingsScreen = ({ profile, onSave, onBack, onManageApps }: { profi
               </motion.div>
             )}
           </AnimatePresence>
-
-          <button 
-            onClick={onManageApps}
-            className="w-full bg-slate-100 text-slate-600 py-4 rounded-2xl font-bold text-lg hover:bg-slate-200 transition-all mb-4 flex items-center justify-center gap-3"
-          >
-            <Layers className="w-6 h-6" />
-            Manage Blocked Apps
-          </button>
 
           <button 
             onClick={() => {
