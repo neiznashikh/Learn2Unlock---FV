@@ -5,7 +5,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
 import { 
-  Lock, Settings, User, Baby, Brain, CheckCircle2, XCircle, ChevronRight, LogOut, Mic, Volume2, AlertCircle, RefreshCcw, X 
+  Lock, Settings, User, Baby, Brain, CheckCircle2, XCircle, ChevronRight, LogOut, Mic, Volume2, AlertCircle, RefreshCcw, X, Layers, Smartphone, ShieldCheck
 } from 'lucide-react';
 import { AppView, ChildProfile, Task, TaskType } from './types';
 import { generateTask, evaluateAudio, evaluateTextAnswer, generateSpeech } from './services/geminiService';
@@ -82,7 +82,7 @@ const PinScreen = ({ onUnlock, correctPin }: { onUnlock: () => void, correctPin:
   );
 };
 
-const ParentSettingsScreen = ({ profile, onSave, onBack }: { profile: ChildProfile, onSave: (p: ChildProfile) => void, onBack: () => void }) => {
+const ParentSettingsScreen = ({ profile, onSave, onBack, onManageApps }: { profile: ChildProfile, onSave: (p: ChildProfile) => void, onBack: () => void, onManageApps: () => void }) => {
   const [formData, setFormData] = useState<ChildProfile>(profile);
   const [localError, setLocalError] = useState<string | null>(null);
 
@@ -273,6 +273,14 @@ const ParentSettingsScreen = ({ profile, onSave, onBack }: { profile: ChildProfi
               </motion.div>
             )}
           </AnimatePresence>
+
+          <button 
+            onClick={onManageApps}
+            className="w-full bg-slate-100 text-slate-600 py-4 rounded-2xl font-bold text-lg hover:bg-slate-200 transition-all mb-4 flex items-center justify-center gap-3"
+          >
+            <Layers className="w-6 h-6" />
+            Manage Blocked Apps
+          </button>
 
           <button 
             onClick={() => {
@@ -771,6 +779,13 @@ const TaskScreen = ({ profile, onComplete, onParentMode }: { profile: ChildProfi
 };
 
 const SuccessScreen = ({ onFinish }: { onFinish: () => void }) => {
+  useEffect(() => {
+    // Если мы в приложении через Native Bridge, разблокируем текущее приложение
+    if ((window as any).Android) {
+      (window as any).Android.unlockCurrentApp();
+    }
+  }, []);
+  
   return (
     <div className="min-h-screen bg-green-500 flex flex-col items-center justify-center p-6 text-white text-center">
       <motion.div
@@ -814,10 +829,186 @@ const SuccessScreen = ({ onFinish }: { onFinish: () => void }) => {
   );
 };
 
+const AppManagementScreen = ({ onBack }: { onBack: () => void }) => {
+  const [apps, setApps] = useState<{name: string, packageName: string}[]>([]);
+  const [blockedPackages, setBlockedPackages] = useState<string[]>([]);
+  const [search, setSearch] = useState('');
+  const [permissions, setPermissions] = useState({ usageStats: false, overlay: false });
+  const [loading, setLoading] = useState(true);
+
+  const isAndroid = !!(window as any).Android;
+
+  const refreshApps = () => {
+    if (isAndroid) {
+      try {
+        const appsStr = (window as any).Android.getInstalledApps();
+        setApps(JSON.parse(appsStr).sort((a: any, b: any) => a.name.localeCompare(b.name)));
+        
+        const permsStr = (window as any).Android.checkPermissions();
+        setPermissions(JSON.parse(permsStr));
+      } catch (e) {
+        console.error("Native Bridge error", e);
+      }
+    } else {
+      // Mock for browser testing
+      setApps([
+        { name: 'YouTube', packageName: 'com.google.android.youtube' },
+        { name: 'Roblox', packageName: 'com.roblox.client' },
+        { name: 'TikTok', packageName: 'com.zhiliaoapp.musically' },
+        { name: 'Minecraft', packageName: 'com.mojang.minecraftpe' }
+      ]);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    refreshApps();
+    const saved = localStorage.getItem('blocked_packages');
+    if (saved) setBlockedPackages(JSON.parse(saved));
+  }, []);
+
+  const toggleApp = (pkg: string) => {
+    const newList = blockedPackages.includes(pkg) 
+      ? blockedPackages.filter(p => p !== pkg)
+      : [...blockedPackages, pkg];
+    
+    setBlockedPackages(newList);
+    localStorage.setItem('blocked_packages', JSON.stringify(newList));
+    
+    if (isAndroid) {
+      (window as any).Android.setBlockedApps(JSON.stringify(newList));
+    }
+  };
+
+  const filteredApps = apps.filter(a => a.name.toLowerCase().includes(search.toLowerCase()) || a.packageName.toLowerCase().includes(search.toLowerCase()));
+
+  return (
+    <div className="min-h-screen bg-slate-50 p-6 pb-24">
+      <div className="max-w-2xl mx-auto">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm border border-slate-100">
+              <Layers className="w-6 h-6 text-indigo-600" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-display font-black text-slate-900">App Locks</h1>
+              <p className="text-slate-400 text-xs font-medium uppercase tracking-widest">Select what to block</p>
+            </div>
+          </div>
+          <button onClick={onBack} className="p-3 bg-white hover:bg-slate-100 rounded-xl shadow-sm border border-slate-200 transition-all">
+            <X className="w-5 h-5 text-slate-500" />
+          </button>
+        </div>
+
+        {!isAndroid && (
+          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-2xl text-amber-800 text-sm flex gap-3">
+            <AlertCircle className="w-5 h-5 shrink-0" />
+            <p>Native features are only available in the Android APK. Mocking apps for preview.</p>
+          </div>
+        )}
+
+        {isAndroid && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+            <div className={`p-5 rounded-[2rem] border-2 transition-all ${permissions.usageStats ? 'bg-green-50 border-green-100' : 'bg-red-50 border-red-100'}`}>
+              <div className="flex items-center justify-between mb-2">
+                <Smartphone className={`w-6 h-6 ${permissions.usageStats ? 'text-green-600' : 'text-red-600'}`} />
+                {permissions.usageStats ? <ShieldCheck className="w-5 h-5 text-green-600" /> : <XCircle className="w-5 h-5 text-red-600" />}
+              </div>
+              <p className="font-bold text-slate-800 text-sm mb-1">Usage Stats</p>
+              <p className="text-xs text-slate-500 mb-3">Needed to detect open apps</p>
+              {!permissions.usageStats && (
+                <button 
+                  onClick={() => (window as any).Android.requestUsageStatsPermission()}
+                  className="w-full py-2 bg-red-600 text-white text-xs font-bold rounded-xl hover:bg-red-700"
+                >
+                  Enable Permission
+                </button>
+              )}
+            </div>
+
+            <div className={`p-5 rounded-[2rem] border-2 transition-all ${permissions.overlay ? 'bg-green-50 border-green-100' : 'bg-red-50 border-red-100'}`}>
+              <div className="flex items-center justify-between mb-2">
+                <Layers className={`w-6 h-6 ${permissions.overlay ? 'text-green-600' : 'text-red-600'}`} />
+                {permissions.overlay ? <ShieldCheck className="w-5 h-5 text-green-600" /> : <XCircle className="w-5 h-5 text-red-600" />}
+              </div>
+              <p className="font-bold text-slate-800 text-sm mb-1">Overlay View</p>
+              <p className="text-xs text-slate-500 mb-3">Needed to show lock screen</p>
+              {!permissions.overlay && (
+                <button 
+                  onClick={() => (window as any).Android.requestOverlayPermission()}
+                  className="w-full py-2 bg-red-600 text-white text-xs font-bold rounded-xl hover:bg-red-700"
+                >
+                  Enable Permission
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className="bg-white rounded-[2rem] shadow-sm border border-slate-200 p-6">
+          <div className="relative mb-6">
+            <input 
+              type="text"
+              placeholder="Search apps..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500/20"
+            />
+            <Settings className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+          </div>
+
+          <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+            {loading ? (
+              <p className="text-center py-10 text-slate-400 animate-pulse">Scanning apps...</p>
+            ) : filteredApps.length === 0 ? (
+              <p className="text-center py-10 text-slate-400">No apps found</p>
+            ) : filteredApps.map(app => (
+              <button
+                key={app.packageName}
+                onClick={() => toggleApp(app.packageName)}
+                className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all ${
+                  blockedPackages.includes(app.packageName) 
+                    ? 'bg-red-50 border border-red-100' 
+                    : 'hover:bg-slate-50 border border-transparent'
+                }`}
+              >
+                <div className="flex items-center gap-4 text-left">
+                  <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center font-black text-slate-400 text-xs text-center p-1">
+                    {app.name.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-900 leading-tight">{app.name}</p>
+                    <p className="text-[10px] text-slate-400 font-mono truncate max-w-[150px]">{app.packageName}</p>
+                  </div>
+                </div>
+                {blockedPackages.includes(app.packageName) ? (
+                  <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+                    <Lock className="w-3 h-3 text-white" />
+                  </div>
+                ) : (
+                  <div className="w-6 h-6 bg-slate-100 rounded-full" />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <p className="text-center text-slate-400 text-xs mt-8 px-6">
+          Apps selected here will be blocked until the child solves the required number of educational tasks.
+        </p>
+      </div>
+    </div>
+  );
+};
+
 // --- Main App ---
 
 export default function App() {
-  const [view, setView] = useState<AppView | 'SUCCESS'>(() => {
+  const [view, setView] = useState<AppView | 'SUCCESS' | 'APP_MANAGEMENT'>(() => {
+    // Check if we are being launched as a lock screen
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('lock') === 'true') return 'CHILD_LOCK';
+    
     const isFirstRun = !localStorage.getItem('child_profile_saved');
     return isFirstRun ? 'SETTINGS' : 'CHILD_LOCK';
   });
@@ -889,6 +1080,7 @@ export default function App() {
               profile={profile} 
               onSave={saveProfile} 
               onBack={() => setView('CHILD_LOCK')}
+              onManageApps={() => setView('APP_MANAGEMENT')}
             />
           </motion.div>
         )}
@@ -909,6 +1101,14 @@ export default function App() {
               profile={profile} 
               onComplete={recordSuccess} 
               onParentMode={() => setView('PIN')}
+            />
+          </motion.div>
+        )}
+
+        {view === 'APP_MANAGEMENT' && (
+          <motion.div key="app-mgmt" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <AppManagementScreen 
+              onBack={() => setView('SETTINGS')}
             />
           </motion.div>
         )}
