@@ -1,5 +1,11 @@
 export type TaskType = 'SCHOOL_MATH' | 'LOGIC' | 'READING' | 'RETELLING';
 
+export interface HistoryEntry {
+  date: string;
+  tasksSolved: number;
+  subject: TaskType;
+}
+
 export interface ChildProfile {
   name: string;
   age: number;
@@ -9,6 +15,7 @@ export interface ChildProfile {
   taskCount: number;
   preferredTaskType: TaskType;
   parentPin: string;
+  history?: HistoryEntry[];
 }
 
 export interface MathTask {

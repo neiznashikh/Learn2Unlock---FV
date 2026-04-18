@@ -232,3 +232,20 @@ export async function evaluateTextAnswer(userAnswer: string, task: Task, profile
     return { success: isCorrect, feedback: isCorrect ? "Correct!" : "Try again!" };
   }
 }
+
+export async function generateSpeech(text: string): Promise<string | null> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || apiKey === 'undefined' || apiKey === '' || apiKey === 'MY_GEMINI_API_KEY') {
+    return null;
+  }
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3.1-flash-tts-preview',
+      contents: [{ text }]
+    });
+    return (response as any).audioData || null;
+  } catch (error) {
+    console.error("TTS Error:", error);
+    return null;
+  }
+}

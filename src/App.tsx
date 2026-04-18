@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Lock, Settings, User, Baby, Brain, CheckCircle2, XCircle, ChevronRight, LogOut, Mic, Volume2, AlertCircle, RefreshCcw, X } from 'lucide-react';
 import logo from './logo.png';
 import { AppView, ChildProfile, Task, TaskType } from './types';
-import { generateTask, evaluateAudio, evaluateTextAnswer } from './services/geminiService';
+import { generateTask, evaluateAudio, evaluateTextAnswer, generateSpeech } from './services/geminiService';
 
 // --- Components ---
 
@@ -31,30 +31,31 @@ const PinScreen = ({ onUnlock, correctPin }: { onUnlock: () => void, correctPin:
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-from)_0%,_transparent_50%)] from-indigo-100">
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 text-center"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="w-full max-w-md bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-10 text-center border border-white/50 backdrop-blur-sm"
       >
-        <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mx-auto mb-6 p-2 overflow-hidden shadow-sm border border-slate-100">
+        <div className="w-24 h-24 bg-white rounded-3xl flex items-center justify-center mx-auto mb-8 p-3 overflow-hidden shadow-xl shadow-indigo-100 border border-slate-100">
           <img src={logo} alt="Learn2Unlock" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
         </div>
-        <h1 className="text-2xl font-black text-indigo-950 mb-2">Learn2Unlock</h1>
-        <p className="text-slate-500 mb-8 font-medium">Enter 6-digit PIN to access settings</p>
+        <h1 className="text-3xl font-display font-black text-indigo-950 mb-2">Learn2Unlock</h1>
+        <p className="text-slate-500 mb-10 font-medium">Enter 6-digit PIN to access settings</p>
         
-        <div className="flex justify-center gap-3 mb-10">
+        <div className="flex justify-center gap-4 mb-12">
           {[0, 1, 2, 3, 4, 5].map((i) => (
-            <div 
+            <motion.div 
               key={i}
-              className={`w-4 h-4 rounded-full border-2 transition-all duration-200 ${
-                pin.length > i ? 'bg-blue-600 border-blue-600 scale-110' : 'border-slate-300'
+              animate={pin.length > i ? { scale: [1, 1.2, 1] } : {}}
+              className={`w-5 h-5 rounded-full border-2 transition-all duration-300 ${
+                pin.length > i ? 'bg-indigo-600 border-indigo-600 shadow-[0_0_15px_rgba(79,70,229,0.4)]' : 'border-slate-200'
               } ${error ? 'bg-red-500 border-red-500 animate-shake' : ''}`}
             />
           ))}
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, '', 0, 'C'].map((btn, i) => (
             <button
               key={i}
@@ -62,8 +63,8 @@ const PinScreen = ({ onUnlock, correctPin }: { onUnlock: () => void, correctPin:
                 if (btn === 'C') setPin('');
                 else if (btn !== '') handlePin(btn.toString());
               }}
-              className={`h-16 rounded-2xl text-xl font-semibold transition-all active:scale-95 ${
-                btn === '' ? 'invisible' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              className={`h-20 rounded-[1.5rem] text-2xl font-display font-bold transition-all active:scale-90 ${
+                btn === '' ? 'invisible' : 'bg-slate-50 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 border border-transparent hover:border-indigo-100'
               }`}
             >
               {btn}
@@ -85,17 +86,51 @@ const ParentSettingsScreen = ({ profile, onSave, onBack }: { profile: ChildProfi
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center p-2 shadow-sm border border-slate-100">
+            <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center p-2 shadow-sm border border-slate-100">
               <img src={logo} alt="L2U" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
             </div>
-            <h1 className="text-3xl font-black text-slate-900">Settings</h1>
+            <div>
+              <h1 className="text-3xl font-display font-black text-slate-900 leading-none mb-1">Settings</h1>
+              <p className="text-slate-400 text-sm font-medium">Parental Control Panel</p>
+            </div>
           </div>
-          <button onClick={onBack} className="p-3 hover:bg-slate-200 rounded-full transition-colors">
-            <LogOut className="w-6 h-6 text-slate-500" />
+          <button onClick={onBack} className="p-4 bg-slate-100 hover:bg-slate-200 rounded-2xl transition-all active:scale-95 group">
+            <LogOut className="w-6 h-6 text-slate-500 group-hover:text-indigo-600" />
           </button>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 space-y-6">
+        <div className="space-y-8">
+          {/* Stats Dashboard */}
+          {profile.history && profile.history.length > 0 && (
+            <div className="bg-white rounded-[2rem] shadow-sm border border-slate-200 p-8">
+              <h2 className="text-xl font-display font-black mb-6 flex items-center gap-3">
+                <CheckCircle2 className="w-6 h-6 text-green-500" />
+                Progress Report
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="bg-slate-50 p-4 rounded-2xl">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Solved</p>
+                  <p className="text-3xl font-display font-black text-indigo-600">
+                    {profile.history.reduce((acc, curr) => acc + curr.tasksSolved, 0)}
+                  </p>
+                </div>
+                <div className="bg-slate-50 p-4 rounded-2xl">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Sessions</p>
+                  <p className="text-3xl font-display font-black text-indigo-600">{profile.history.length}</p>
+                </div>
+                <div className="bg-slate-50 p-4 rounded-2xl">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Last Date</p>
+                  <p className="text-sm font-black text-indigo-600 truncate">{new Date(profile.history[profile.history.length - 1].date).toLocaleDateString()}</p>
+                </div>
+                <div className="bg-slate-50 p-4 rounded-2xl">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Main Skill</p>
+                  <p className="text-sm font-black text-indigo-600 uppercase">{profile.preferredTaskType.split('_')[0]}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="bg-white rounded-[2rem] shadow-sm border border-slate-200 p-8 space-y-6">
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">Child's Name</label>
             <input 
@@ -233,7 +268,8 @@ const ParentSettingsScreen = ({ profile, onSave, onBack }: { profile: ChildProfi
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 };
 
 const ChildScreen = ({ profile, onStartTask, onParentMode }: { profile: ChildProfile, onStartTask: () => void, onParentMode: () => void }) => {
@@ -286,6 +322,7 @@ const TaskScreen = ({ profile, onComplete, onParentMode }: { profile: ChildProfi
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [evaluating, setEvaluating] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [isSpeaking, setIsSpeaking] = useState(false);
 
   const loadTask = async () => {
     setLoading(true);
@@ -345,6 +382,26 @@ const TaskScreen = ({ profile, onComplete, onParentMode }: { profile: ChildProfi
         mediaRecorder.stream.getTracks().forEach(t => t.stop());
       }
       setMediaRecorder(null);
+    }
+  };
+
+  const handleSpeak = async () => {
+    if (!task) return;
+    const text = task.type === 'READING' ? task.text : (task.type === 'RETELLING' ? task.story : '');
+    if (!text) return;
+
+    setIsSpeaking(true);
+    const audioData = await generateSpeech(text);
+    if (audioData) {
+      const audio = new Audio('data:audio/wav;base64,' + audioData);
+      audio.onended = () => setIsSpeaking(false);
+      audio.play();
+    } else {
+      // Browser fallback
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = profile.language.toLowerCase().includes('ru') ? 'ru-RU' : 'en-US';
+      utterance.onend = () => setIsSpeaking(false);
+      window.speechSynthesis.speak(utterance);
     }
   };
 
@@ -487,13 +544,33 @@ const TaskScreen = ({ profile, onComplete, onParentMode }: { profile: ChildProfi
           )}
           {task?.type === 'READING' && (
             <div className="space-y-3">
-              <p className="text-xs text-indigo-400 font-black uppercase tracking-widest">Read this text:</p>
+              <div className="flex justify-between items-center">
+                <p className="text-xs text-indigo-400 font-black uppercase tracking-widest">Read this text:</p>
+                <button 
+                  onClick={handleSpeak}
+                  disabled={isSpeaking}
+                  className="flex items-center gap-2 text-indigo-600 font-bold text-sm bg-indigo-50 px-3 py-1 rounded-full hover:bg-indigo-100 disabled:opacity-50"
+                >
+                  <Volume2 className={`w-4 h-4 ${isSpeaking ? 'animate-pulse' : ''}`} />
+                  {isSpeaking ? 'Listening...' : 'Hear it'}
+                </button>
+              </div>
               <p className="text-xl font-bold leading-relaxed bg-slate-50 p-5 rounded-2xl border-2 border-slate-100 text-slate-800">{task.text}</p>
             </div>
           )}
           {task?.type === 'RETELLING' && (
             <div className="space-y-3">
-              <p className="text-xs text-indigo-400 font-black uppercase tracking-widest">Listen/Read and retell:</p>
+              <div className="flex justify-between items-center">
+                <p className="text-xs text-indigo-400 font-black uppercase tracking-widest">Listen/Read and retell:</p>
+                <button 
+                  onClick={handleSpeak}
+                  disabled={isSpeaking}
+                  className="flex items-center gap-2 text-indigo-600 font-bold text-sm bg-indigo-50 px-3 py-1 rounded-full hover:bg-indigo-100 disabled:opacity-50"
+                >
+                  <Volume2 className={`w-4 h-4 ${isSpeaking ? 'animate-pulse' : ''}`} />
+                  {isSpeaking ? 'Listening...' : 'Read it to me'}
+                </button>
+              </div>
               <p className="text-xl font-bold leading-relaxed bg-slate-50 p-5 rounded-2xl border-2 border-slate-100 text-slate-800">{task.story}</p>
             </div>
           )}
@@ -665,10 +742,54 @@ const TaskScreen = ({ profile, onComplete, onParentMode }: { profile: ChildProfi
   );
 };
 
+const SuccessScreen = ({ onFinish }: { onFinish: () => void }) => {
+  return (
+    <div className="min-h-screen bg-green-500 flex flex-col items-center justify-center p-6 text-white text-center">
+      <motion.div
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ type: "spring", damping: 10, stiffness: 100 }}
+      >
+        <div className="w-32 h-32 bg-white rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-2xl p-4 overflow-hidden">
+          <CheckCircle2 className="w-full h-full text-green-500" />
+        </div>
+      </motion.div>
+      
+      <motion.h1 
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2 }}
+        className="text-5xl font-display font-black mb-4 tracking-tight"
+      >
+        SUPER WORK! 🏆
+      </motion.h1>
+      
+      <motion.p 
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.3 }}
+        className="text-xl text-white/80 mb-12 max-w-xs mx-auto"
+      >
+        You have solved all tasks. The phone is now unlocked! Enjoy!
+      </motion.p>
+      
+      <motion.button 
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.4 }}
+        onClick={onFinish}
+        className="bg-white text-green-600 px-12 py-5 rounded-3xl font-black text-2xl shadow-2xl hover:scale-105 transition-all active:scale-95"
+      >
+        GO! 🚀
+      </motion.button>
+    </div>
+  );
+};
+
 // --- Main App ---
 
 export default function App() {
-  const [view, setView] = useState<AppView>(() => {
+  const [view, setView] = useState<AppView | 'SUCCESS'>(() => {
     const isFirstRun = !localStorage.getItem('child_profile_saved');
     return isFirstRun ? 'SETTINGS' : 'CHILD_LOCK';
   });
@@ -691,17 +812,24 @@ export default function App() {
     setProfile(p);
     localStorage.setItem('child_profile', JSON.stringify(p));
     localStorage.setItem('child_profile_saved', 'true');
-    
-    // Attempt to go fullscreen for better "lock" simulation
-    try {
-      if (document.documentElement.requestFullscreen) {
-        document.documentElement.requestFullscreen();
-      }
-    } catch (e) {
-      console.log("Fullscreen not supported or requires user gesture");
-    }
-
     setView('CHILD_LOCK');
+  };
+
+  const recordSuccess = () => {
+    const newEntry = {
+      date: new Date().toISOString(),
+      tasksSolved: profile.taskCount,
+      subject: profile.preferredTaskType
+    };
+    
+    const updatedProfile = {
+      ...profile,
+      history: [...(profile.history || []), newEntry].slice(-20) // Keep last 20 sessions
+    };
+    
+    setProfile(updatedProfile);
+    localStorage.setItem('child_profile', JSON.stringify(updatedProfile));
+    setView('SUCCESS');
   };
 
   return (
@@ -737,9 +865,15 @@ export default function App() {
           <motion.div key="task" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <TaskScreen 
               profile={profile} 
-              onComplete={() => setView('CHILD_LOCK')} 
+              onComplete={recordSuccess} 
               onParentMode={() => setView('PIN')}
             />
+          </motion.div>
+        )}
+
+        {view === 'SUCCESS' && (
+          <motion.div key="success" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <SuccessScreen onFinish={() => setView('CHILD_LOCK')} />
           </motion.div>
         )}
       </AnimatePresence>
