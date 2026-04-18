@@ -1,2 +1,2 @@
 # Sync trigger src
-# Duplicate XML removed, PNG should now be primary: 2026-04-18 07:08
+# Unifying icon and roundIcon to @mipmap/ic_launcher to ensure build success: 2026-04-18 07:15
