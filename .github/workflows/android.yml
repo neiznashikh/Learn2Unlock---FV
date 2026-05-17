@@ -5,12 +5,11 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -25,31 +24,31 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: 8.5
-          cache-disabled: true
 
       - name: Build with Gradle
         run: |
           cd android
-          if [ -f "gradlew" ]; then
-            chmod +x gradlew
-            ./gradlew assembleDebug --stacktrace
-          else
-            gradle assembleDebug --stacktrace
-          fi
+          gradle assembleDebug --stacktrace
 
-      - name: Upload APK
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Learn2Unlock-Debug-APK
           path: android/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
 
-      - name: Create Release
+      - name: Create or Update Release
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
           name: Latest Build
+          body: |
+            ## Learn2Unlock Latest Build
+            Automatically generated APK for testing.
+            
+            **Note:** This is a debug build. You may need to disable Play Protect to install it.
           files: android/app/build/outputs/apk/debug/*.apk
+          make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
