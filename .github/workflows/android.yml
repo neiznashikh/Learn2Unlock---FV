@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   build:
@@ -23,13 +23,12 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+      - name: Setup and Build with Gradle
+        uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: 8.5
-
-      - name: Build with Gradle
-        run: gradle -p android assembleDebug --stacktrace --no-daemon
+          arguments: assembleDebug --stacktrace
+          build-root-directory: android
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
@@ -42,8 +41,8 @@ jobs:
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: latest
-          name: Latest Build
+          tag_name: "v4.0-${{ github.run_number }}"
+          name: "Build v4.0 #${{ github.run_number }}"
           body: |
             ## Learn2Unlock Latest Build
             Automatically generated APK for testing.
