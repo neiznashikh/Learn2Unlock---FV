@@ -29,9 +29,7 @@ jobs:
           gradle-version: 8.5
 
       - name: Build with Gradle
-        run: |
-          cd android
-          gradle assembleDebug --stacktrace --no-daemon
+        run: gradle -p android assembleDebug --stacktrace --no-daemon
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
