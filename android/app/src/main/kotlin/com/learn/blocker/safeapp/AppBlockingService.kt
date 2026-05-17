@@ -122,7 +122,7 @@ class AppBlockingService : Service() {
         return NotificationCompat.Builder(this, "blocking_service")
             .setContentTitle(title)
             .setContentText(content)
-            .setSmallIcon(R.drawable.ic_launcher_placeholder)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .build()
     }
 
