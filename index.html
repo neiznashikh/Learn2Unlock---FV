@@ -5,6 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Learn2Unlock</title>
     <link rel="icon" type="image/png" href="/logo.png" />
+    <script>
+      // Fix for "Cannot set property fetch of #<Window> which has only a getter"
+      // Some polyfills (like formdata-polyfill) try to assign to global.fetch.
+      (function() {
+        try {
+          var originalFetch = window.fetch;
+          Object.defineProperty(window, 'fetch', {
+            value: originalFetch,
+            configurable: true,
+            writable: true,
+            enumerable: true
+          });
+        } catch (e) {
+          console.warn('Learn2Unlock: Could not patch fetch property, polyfills might fail.', e);
+        }
+        
+        // Also provide a safe 'global' object as a fallback
+        if (typeof global === 'undefined') {
+          window.global = window;
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
