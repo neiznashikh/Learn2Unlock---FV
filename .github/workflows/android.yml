@@ -43,3 +43,13 @@ jobs:
           name: Learn2Unlock-Debug-APK
           path: android/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
+
+      - name: Create Release
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: latest
+          name: Latest Build
+          files: android/app/build/outputs/apk/debug/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
