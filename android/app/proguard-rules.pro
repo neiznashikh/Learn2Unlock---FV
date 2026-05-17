@@ -1,2 +1,2 @@
 # ProGuard rules for Learn2Unlock
--keep class com.learn2unlock.app.** { *; }
+-keep class com.learn.blocker.safeapp.** { *; }
