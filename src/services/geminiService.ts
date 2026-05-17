@@ -19,7 +19,9 @@ export async function generateTask(profile: ChildProfile): Promise<AIResult> {
   if (!apiKey || apiKey === 'undefined' || apiKey === '' || apiKey === 'MY_GEMINI_API_KEY') {
     return {
       task: FALLBACK_TASKS.ru[0],
-      error: "AI not configured. Please add MY_OWN_KEY secret in Settings -> Secrets and paste your API key."
+      error: profile.language.toLowerCase().includes('ru') 
+        ? "ИИ не настроен. Пожалуйста, добавьте секрет MY_GEMINI_API_KEY в меню Settings -> Secrets и вставьте ваш ключ."
+        : "AI not configured. Please add MY_GEMINI_API_KEY secret in Settings -> Secrets and paste your API key."
     };
   }
   try {
